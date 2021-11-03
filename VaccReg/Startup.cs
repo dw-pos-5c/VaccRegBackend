@@ -33,12 +33,14 @@ namespace VaccReg
 
     public void ConfigureServices(IServiceCollection services)
     {
-      var builder = new SqliteConnectionStringBuilder(@"Data Source=c:\Users\eugen\Unterricht\Tools\createWepapiProject\vaccinations.db");
+      var builder = new SqliteConnectionStringBuilder(Configuration["ConnectionStrings:Default"]);
       var location = System.Reflection.Assembly.GetEntryAssembly().Location;
       string dataDirectory = System.IO.Path.GetDirectoryName(location);
       builder.DataSource = System.IO.Path.Combine(dataDirectory, builder.DataSource);
       var absoluteConnectionString = builder.ToString();
       services.AddDbContext<VaccRegContext>(options => options.UseSqlite(absoluteConnectionString));
+
+      Console.WriteLine(Configuration["import"]);
 
       services.AddCors(options =>
       {

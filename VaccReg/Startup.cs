@@ -11,81 +11,86 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+
+using VaccReg.Services;
+
 using VaccRegDb;
 
 namespace VaccReg
 {
-  public class Startup
-  {
-    private readonly string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
-    private const string swaggerVersion = "v1";
-    private const string swaggerTitle = "VaccReg";
-
-    public Startup(IConfiguration configuration)
+    public class Startup
     {
-      Configuration = configuration;
-    }
+        private readonly string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+        private const string swaggerVersion = "v1";
+        private const string swaggerTitle = "VaccReg";
 
-    public IConfiguration Configuration { get; }
-
-    public void ConfigureServices(IServiceCollection services)
-    {
-      var builder = new SqliteConnectionStringBuilder(Configuration["ConnectionStrings:Default"]);
-      var location = System.Reflection.Assembly.GetEntryAssembly().Location;
-      string dataDirectory = System.IO.Path.GetDirectoryName(location);
-      builder.DataSource = System.IO.Path.Combine(dataDirectory, builder.DataSource);
-      var absoluteConnectionString = builder.ToString();
-      services.AddDbContext<VaccRegContext>(options => options.UseSqlite(absoluteConnectionString));
-
-      Console.WriteLine(Configuration["import"]);
-
-      services.AddCors(options =>
-      {
-        options.AddPolicy(myAllowSpecificOrigins,
-            x => x.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-          );
-      });
-      services.AddControllers();
-      services.AddSwaggerGen(x =>
-      {
-        x.SwaggerDoc(swaggerVersion, new OpenApiInfo
+        public Startup(IConfiguration configuration)
         {
-          Title = swaggerTitle,
-          Version = swaggerVersion
-        });
-      });
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            var builder = new SqliteConnectionStringBuilder(Configuration["ConnectionStrings:Default"]);
+            var location = System.Reflection.Assembly.GetEntryAssembly().Location;
+            string dataDirectory = System.IO.Path.GetDirectoryName(location);
+            builder.DataSource = System.IO.Path.Combine(dataDirectory, builder.DataSource);
+            var absoluteConnectionString = builder.ToString();
+            services.AddDbContext<VaccRegContext>(options => options.UseSqlite(absoluteConnectionString));
+
+            services.AddScoped<RegistrationsService>();
+            services.AddScoped<VaccinationsService>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(myAllowSpecificOrigins,
+              x => x.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+            );
+            });
+            services.AddControllers();
+            services.AddSwaggerGen(x =>
+            {
+                x.SwaggerDoc(swaggerVersion, new OpenApiInfo
+                {
+                    Title = swaggerTitle,
+                    Version = swaggerVersion
+                });
+            });
+
+            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddHostedService<DbSeederService>();
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                Console.WriteLine("UseSwagger");
+                app.UseSwagger();
+                app.UseSwaggerUI(x =>
+                {
+                    x.SwaggerEndpoint($"/swagger/{swaggerVersion}/swagger.json", swaggerTitle);
+                });
+            }
+
+            app.UseCors(myAllowSpecificOrigins);
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
     }
-
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-     if (env.IsDevelopment())
-      {
-        app.UseDeveloperExceptionPage();
-	    Console.WriteLine("UseSwagger");
-	    app.UseSwagger();
-	    app.UseSwaggerUI(x =>
-	    {
-		  x.SwaggerEndpoint( $"/swagger/{swaggerVersion}/swagger.json", swaggerTitle);
-	    });
-      }
-
-      app.UseCors(myAllowSpecificOrigins);
-
-      app.UseHttpsRedirection();
-
-      app.UseRouting();
-
-      app.UseAuthorization();
-
-      app.UseEndpoints(endpoints =>
-      {
-        endpoints.MapControllers();
-      });
-    }
-  }
 }

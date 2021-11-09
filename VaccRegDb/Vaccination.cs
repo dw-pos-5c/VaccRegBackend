@@ -9,7 +9,7 @@ namespace VaccRegDb
     {
         public long Id { get; set; }
         public long RegistrationId { get; set; }
-        public string VaccinationDate { get; set; }
+        public DateTime VaccinationDate { get; set; }
 
         public virtual Registration Registration { get; set; }
     }

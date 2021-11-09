@@ -15,5 +15,10 @@ namespace VaccReg.Services
         {
             this.db = db;
         }
+
+        public Registration CheckRegistration(long ssn, long pin)
+        {
+            return db.Registrations.FirstOrDefault(x => x.SocialSecurityNumber == ssn && x.PinCode == pin);
+        }
     }
 }

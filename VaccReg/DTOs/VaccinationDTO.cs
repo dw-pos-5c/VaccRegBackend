@@ -9,7 +9,6 @@ namespace VaccReg.DTOs
 {
     public class VaccinationDTO
     {
-        public long Id { get; set; }
         public long RegistrationId { get; set; }
         public DateTime VaccinationDate { get; set; }
 
@@ -17,7 +16,6 @@ namespace VaccReg.DTOs
         {
             return new VaccinationDTO
             {
-                Id = input.Id,
                 RegistrationId = input.RegistrationId,
                 VaccinationDate = input.VaccinationDate,
             };

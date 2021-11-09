@@ -21,5 +21,18 @@ namespace VaccReg.Controllers
         {
             this.registrationsService = registrationsService;
         }
+
+        [HttpGet("check")]
+        public IActionResult CheckRegistration(long ssn, long pin)
+        {
+            var registration = registrationsService.CheckRegistration(ssn, pin);
+
+            if (registration == null)
+            {
+                return BadRequest("These registration-infos are not valid!");
+            }
+
+            return Ok(registration);
+        }
     }
 }

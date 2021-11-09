@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using VaccReg.DTOs;
+
 using VaccRegDb;
 
 namespace VaccReg.Services
@@ -22,6 +25,8 @@ namespace VaccReg.Services
 
         public List<DateTime> GetAvailableDates(DateTime date)
         {
+            Console.WriteLine(date);
+
             List<DateTime> availVaccinations = new();
 
             var notAvailList = db.Vaccinations.Where(x => x.VaccinationDate.Date == date.Date).ToList();
@@ -34,8 +39,21 @@ namespace VaccReg.Services
                     availVaccinations.Add(current);
                 }
             }
+            Console.WriteLine(availVaccinations);
 
             return availVaccinations;
+        }
+
+        public Vaccination AddVaccination(VaccinationDTO vaccination)
+        {
+            var entity = db.Vaccinations.Add(new Vaccination
+            {
+                RegistrationId = vaccination.RegistrationId,
+                VaccinationDate = vaccination.VaccinationDate.AddDays(1),
+            });
+            db.SaveChanges();
+
+            return entity.Entity;
         }
     }
 }

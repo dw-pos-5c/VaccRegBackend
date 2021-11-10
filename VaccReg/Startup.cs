@@ -62,6 +62,9 @@ namespace VaccReg
                 });
             });
 
+            services.AddOptions();
+            services.Configure<DbConfiguration>(Configuration.GetSection("import")); // options pattern is not viable here i guess
+
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddHostedService<DbSeederService>();
         }

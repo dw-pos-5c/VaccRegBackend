@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 using VaccRegDb;
 
 
@@ -20,10 +21,13 @@ namespace VaccReg
         private readonly IServiceScopeFactory scopeFactory;
         private readonly IConfiguration configuration;
 
-        public DbSeederService(IServiceScopeFactory scopeFactory, IConfiguration configuration)
+        public DbSeederService(IServiceScopeFactory scopeFactory, IConfiguration configuration, IOptions<DbConfiguration> dbOptions)
         {
             this.scopeFactory = scopeFactory;
             this.configuration = configuration;
+            var a = configuration.GetSection("import");
+            var b = configuration.GetSection("ConnectionStrings");
+            Console.WriteLine(dbOptions.Value.import);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
